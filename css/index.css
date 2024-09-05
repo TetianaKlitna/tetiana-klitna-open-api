@@ -1,3 +1,28 @@
 body{
-    background-color: lightgrey;
+    background-color: lightsteelblue;
+}
+
+.center {
+    border: 2px solid;
+    border-radius: 20% 10%;
+    border-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    background-color: white;
+    opacity: 0.6;
+}
+
+.tittle{
+    /*centered text*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+#weather_hour{
+    display: flex;
 }
