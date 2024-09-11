@@ -16,21 +16,25 @@ body{
     padding: 10px;
     background-color: white;
     opacity: 0.6;
-    
-    /* During redraw changed size of window */
-    width: 420px; /* Fixed width */
-    height: 350px; /* Fixed height */
+
 }
 
-.centered_text, p{
+.centered_text, p, img{
     /*centered text*/
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px;
+    padding: 5px;
+    margin: 5px;
 }
 
-.spinner {
+ul {
+    list-style-type: none; 
+    padding: 0; 
+    margin: 0;
+}
+
+#spinner {
     border: 8px solid #f3f3f3; /* Light grey */
     border-top: 8px solid #3498db; /* Blue */
     border-radius: 50%;
@@ -41,7 +45,14 @@ body{
 
 .horizontal{
     display: flex;
+    flex-wrap: nowrap;
 }
+
+#forecast_nextdays ul{
+    display: flex;
+    flex-direction: horizontal;
+    flex-wrap: wrap;
+  }
 
 /* .right_pos{
     margin-right: auto;

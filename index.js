@@ -1,4 +1,8 @@
+const apiUrl = "https://api.open-meteo.com/v1/forecast";
+const forecastAmounDays = 3;
 
+var latitude;
+var longitude;
 
 function getDescriptionWeatherCode(weatherCode) {
   
@@ -11,16 +15,17 @@ function getDescriptionWeatherCode(weatherCode) {
       return 'Partly Cloudy';
     case 3:
       return 'Cloudly';//Overcast
-    case 51:
-    case 52:
-    case 53:
+    case 80:
+    case 81:
+    case 82:
+    case 83:
       return 'Rainy';
     case 71:
     case 72:
     case 73:
       return 'Snowy';
     default:
-      return 'Unknown weather code';
+      return 'Unknown code';
   }
   
 }
@@ -35,16 +40,17 @@ function getImageWeatherCode(weatherCode){
       return '../img/partly_cloudy.png';
     case 3:
       return '../img/cloudly.png';
-    case 51:
-    case 52:
-    case 53:
+    case 80:
+    case 81:
+    case 82:
+    case 83:
       return '../img/rainy.png';
     case 71:
     case 72:
     case 73:
       return '../img/snowy.png';
     default:
-      return 'Unknown weather code';
+      return 'Unknown code';
   }
 }
 
@@ -66,8 +72,21 @@ function formatDate(date) {
   const month = date.getMonth(); // 0-based index
   const year = date.getFullYear();
 
-  // Format the date as "January, 1 2024"
+  // Format the date as "January, 1"
   return `${months[month]},${day} ${year}`;
+}
+
+function shortFormatDate(date) {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+
+  const day = date.getDate();
+  const month = date.getMonth(); // 0-based index
+
+  // Format the date as "Jan, 1"
+  return `${months[month]},${day}`;
 }
 
 function getCityByCoord(latitude, longitude){
@@ -97,26 +116,106 @@ function isSunny(weatherCode) {
   return weatherCode === 0;
 }
 
-function displayLocation(latitude, longitude){
+function formatDateToYYYYMMDD(date) {
 
-  let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weathercode&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,weathercode`;
-  fetchData(url);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+
+  return `${year}-${month}-${day}`;
 }
 
-function fetchData(url){
+function getFormattedForecastDate(amountDays) {
+
+  var currentDate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+
+  var day = currentDate.getDate() + amountDays;
+  var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  var year = String(currentDate.getFullYear()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function displayLocation(latitude, longitude){
+
+  clearFetchedFata();
+
+  let startDate = getFormattedForecastDate(1);
+  let endDate = getFormattedForecastDate(forecastAmounDays);
+
+  console.log(startDate, endDate);
+
+  const urlCurrentData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weathercode,relative_humidity_2m`;
+  const urlForecastData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&start_date=${startDate}&end_date=${endDate}`;
+
+  getAllData(urlCurrentData, urlForecastData);
+
+}
+
+
+function getAllData(urlCurrentData, urlForecast) {
+
+  document.getElementById('spinner').style.display = 'block';
+
+  Promise.all([fetch(urlCurrentData), fetch(urlForecast)])
+    .then(responses => {
  
-  fetch(url)
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Request failed');
-    }
-    return response.json(); 
-  })
-  .then(data => {
+      if (!responses[0].ok || !responses[1].ok) {
+        throw new Error('One or more requests failed');
+      }
 
-    document.getElementById('spinner').style.display = 'block';
+      return Promise.all([responses[0].json(), responses[1].json()]);
 
-    console.log(data);
+    })
+    .then(data => {
+
+      const dataCurrent = data[0];
+      const dataDaily = data[1];
+
+      //console.log('Current data:', dataCurrent);
+      console.log('Daily data:', dataDaily);
+
+      getFetchCurrentWeather(dataCurrent);
+      getFetchDailyWeather(dataDaily);
+
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    })
+    .finally(() => {
+      document.getElementById('spinner').style.display = 'none';
+    });
+}
+
+function getFetchDailyWeather(data){
+
+  const nextDays = data.daily.time;
+  const codes = data.daily.weathercode;
+  const minTemps = data.daily.temperature_2m_min;
+  const maxTemps = data.daily.temperature_2m_max;
+  const unitTemps = data.daily_units.temperature_2m_min;
+
+
+  let ulItem  = document.getElementById("forecast_nextdays").querySelector("ul");
+
+  for (let i = 0; i < nextDays.length; i++) {
+
+      let date =  getLocalDate(new Date(nextDays[i]));
+
+      const imgUrl = getImageWeatherCode(codes[i]); 
+      const descImg = getDescriptionWeatherCode(codes[i]); 
+
+      let titleItem = document.createElement("li");
+      titleItem.classList.add("centered_text");
+      titleItem.innerHTML = `<img src="${imgUrl}" alt="${descImg}"/>`; 
+      titleItem.innerHTML += `${getDayWeekStr(date)}  ${shortFormatDate(date)} <br> ${minTemps[i]}/${maxTemps[i]} ${unitTemps}`; 
+      ulItem.append(titleItem);
+  } 
+
+
+}
+
+function getFetchCurrentWeather(data){
 
     const today = new Date(data.current.time);
     
@@ -163,42 +262,29 @@ function fetchData(url){
     currentWeather.append(descWeather);
     //-------------End Weather Code------------------
 
-    //-------------Weather Variables------------------
-    // let ulItem  = document.getElementById("weather_variables").querySelector("ul");
-    // ulItem.style.listStyle = "none";
-    // const itemLi = document.createElement("li");
-    // // const windUrl = '../img/wind.png';
-    // // itemLi.innerHTML = `<img src="${windUrl}" alt="wind logo"/>`; 
-    // itemLi.innerText = `Wind: ${windSpeed} ${windSpeedUnit}`;
-    // ulItem.append(itemLi);
-
-    //-------------End Weather Variables--------------
-  
-    // titleItem.innerHTML = `<p>Today is ${local.toLocaleDateString()}.</p>`+
-    // `<p>Temperature is ${temperature} ${temperatureUnit}.</p>` + 
-    // `<p>Wind speed is ${windSpeed} ${windSpeedUnit}</p>`; 
-     
-
-
-  })
-  .catch(error => {
-    console.error('An error occurred:', error);
-  })
-  .finally(() => {
-    document.getElementById('spinner').style.display = 'none';
-  });
 }
 
 function convertToCelsius(){
+
   clearFetchedFata();
   displayLocation(latitude, longitude);
+
 }
 
 function convertToFahrenheit(){
+
   clearFetchedFata();
-  let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weathercode&temperature_unit=fahrenheit&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,weathercode`;
-  fetchData(url);
+
+  let startDate = getFormattedForecastDate(1);
+  let endDate = getFormattedForecastDate(forecastAmounDays);
+
+  const urlCurrentData =  `${apiUrl}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weathercode&temperature_unit=fahrenheit`;
+  const urlForecastData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&start_date=${startDate}&end_date=${endDate}&temperature_unit=fahrenheit`;
+
+  getAllData(urlCurrentData, urlForecastData);
+
 }
+
 
 function successCallback(position){
 
@@ -211,9 +297,6 @@ function successCallback(position){
 function errorsCallBack(err){
     console.error(`ERROR(${err.code}): ${err.message}`);
 }
-
-var latitude;
-var longitude;
 
 if(navigator.geolocation){
   navigator.geolocation.getCurrentPosition(successCallback, errorsCallBack);
