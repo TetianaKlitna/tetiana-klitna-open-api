@@ -7,25 +7,49 @@
 
 <body>
     
-    <div class = "container center">   
+    <div class = "container center">
+
         <div id = "header">
 
-            <div class="tittle">
-                <div><img alt="Icon with sun and cloud" src="../img/weather_forecast_sun_cloud_icon.png"/></div>
-                <div><strong>WEATHER FORECAST</strong> </div>
+            <div>
+                <div class = "centered_text"><img alt="Icon with sun and cloud" src="../img/weather_forecast_sun_cloud_icon.png"/></div>
+                <div class = "big_font centered_text">WEATHER FORECAST</div>
             </div>
           
         </div>
         
-        <div id = "weather_hourly">
+        <div class="container_btn">
 
-            <ul id = "weather_hour">
+            <!-- <button class="btn" onclick="convertToCelsius()">C</button>
+            <button class="btn" onclick="convertToFahrenheit()">F</button> -->
 
-            </ul>
+            <label>
+                <input type="radio" name="unit" value="C" checked onclick="convertToCelsius()">
+                <span class="btn">C</span>
+            </label>
 
+            <label>
+                <input type="radio" name="unit" value="F" onclick="convertToFahrenheit()">
+                <span class="btn">F</span>
+            </label>
+            
         </div>
 
+       
+        <div id="spinner-container" class="centered_text">
+            <div id="spinner"></div>
+          </div>
 
+        <div class = "horizontal centered_text">
+            <div class = "fetched" id = "current_weather_date"></div>
+            <div class = "fetched" id = "current_temperature"></div>
+            <div class = "fetched" id = "current_weather_code"></div>
+        </div>
+
+        <div id = "forecast_nextdays" class="centered_text">
+            <ul class = "fetched horizontal"></ul>
+        </div>
+        
         <div class = "footer">
 
         </div>
@@ -36,3 +60,4 @@
 </body>
 
 </html>
+
