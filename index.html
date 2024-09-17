@@ -1,63 +1,82 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <link rel="stylesheet" href="css/index.css" />
-</head>
+  </head>
 
-<body>
-    
-    <div class = "container center">
-
-        <div id = "header">
-
-            <div>
-                <div class = "centered_text"><img alt="Icon with sun and cloud" src="../img/weather_forecast_sun_cloud_icon.png"/></div>
-                <div class = "big_font centered_text">WEATHER FORECAST</div>
-            </div>
-          
-        </div>
-        
-        <div class="container_btn">
-
-            <!-- <button class="btn" onclick="convertToCelsius()">C</button>
-            <button class="btn" onclick="convertToFahrenheit()">F</button> -->
-
-            <label>
-                <input type="radio" name="unit" value="C" checked onclick="convertToCelsius()">
-                <span class="btn">C</span>
-            </label>
-
-            <label>
-                <input type="radio" name="unit" value="F" onclick="convertToFahrenheit()">
-                <span class="btn">F</span>
-            </label>
-            
-        </div>
-
-       
-        <div id="spinner-container" class="centered_text">
-            <div id="spinner"></div>
+  <body>
+    <div class="container center border">
+      <div id="header">
+        <div>
+          <div class="centered-text">
+            <img
+              alt="Icon with sun and cloud"
+              src="../img/weather_forecast_sun_cloud_icon.png"
+            />
           </div>
-
-        <div class = "horizontal centered_text">
-            <div class = "fetched" id = "current_weather_date"></div>
-            <div class = "fetched" id = "current_temperature"></div>
-            <div class = "fetched" id = "current_weather_code"></div>
+          <div class="big_font centered-text">WEATHER FORECAST</div>
         </div>
+      </div>
 
-        <div id = "forecast_nextdays" class="centered_text">
-            <ul class = "fetched horizontal"></ul>
-        </div>
-        
-        <div class = "footer">
+      <div class="container_btn">
+        <label>
+          <input
+            type="radio"
+            name="unit"
+            value="C"
+            checked
+            onclick="convertToCelsius()"
+          />
+          <span class="btn">C</span>
+        </label>
 
-        </div>
+        <label>
+          <input
+            type="radio"
+            name="unit"
+            value="F"
+            onclick="convertToFahrenheit()"
+          />
+          <span class="btn">F</span>
+        </label>
+      </div>
 
+      <div id="spinner-container" class="centered-text">
+        <div id="spinner"></div>
+      </div>
+
+      <div class="horizontal centered-text">
+        <div class="fetched" id="current_weather_date"></div>
+        <div class="fetched" id="current_temperature"></div>
+        <div class="fetched" id="current_weather_code"></div>
+      </div>
+
+      <div class="tab">
+        <button
+          class="tablinks btn active"
+          onclick="openTab(event, 'temperature')"
+        >
+          Temperature
+        </button>
+        <button class="tablinks btn" onclick="openTab(event, 'wind')">
+          Wind
+        </button>
+        <button class="tablinks btn" onclick="openTab(event, 'humidity')">
+          Humidity
+        </button>
+      </div>
+
+      <div id="temperature" class="tabcontent active centered-text">
+        <ul class="fetched content-direction"></ul>
+      </div>
+      <div id="wind" class="tabcontent centered-text">
+        <ul class="fetched content-direction"></ul>
+      </div>
+      <div id="humidity" class="tabcontent centered-text">
+        <ul class="fetched content-direction"></ul>
+      </div>
     </div>
-    
+
     <script src="index.js"></script>
-</body>
-
+  </body>
 </html>
-
