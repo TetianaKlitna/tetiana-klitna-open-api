@@ -20,8 +20,7 @@ body {
   opacity: 0.75;
 }
 
-.centered-text
-{
+.centered-text {
   /*centered text*/
   display: flex;
   align-items: center;
@@ -48,29 +47,27 @@ body {
 .content-direction {
   display: flex;
   flex-direction: horizontal;
-  justify-content:space-between;
+  justify-content: space-between;
   list-style-type: none;
   flex-wrap: wrap;
 }
-
 
 .big_font {
   font-size: 1.2rem;
   font-weight: 600;
 }
 
-.super_big_font{
+.super_big_font {
   font-size: 2rem;
   font-weight: 800;
 }
-
 
 img {
   margin: 10px;
   padding: 10px;
 }
 
-ul{
+ul {
   margin: 10;
   padding: 0;
 }
@@ -118,6 +115,6 @@ input[type="radio"]:checked + .btn {
   border-top: none;
 }
 
-.active{
-    display:inline; 
+.active {
+  display: inline;
 }
