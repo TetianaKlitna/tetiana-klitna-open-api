@@ -1,8 +1,29 @@
 const apiUrl = "https://api.open-meteo.com/v1/forecast";
-const forecastAmounDays = 3;
+const current = 'temperature_2m,wind_speed_10m,wind_direction_10m,weathercode,relative_humidity_2m';
+const daily = 'temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_direction_10m_dominant,weathercode,relative_humidity_2m_max,relative_humidity_2m_min';
+const forecastAmounDays = 5;
 
 var latitude;
 var longitude;
+
+const directions = [
+  { name: 'North', min: 0, max: 22.5, arrow: '↑' },
+  { name: 'North-Northeast', min: 22.5, max: 45, arrow: '↗'},
+  { name: 'Northeast', min: 45, max: 67.5, arrow: '↗'},
+  { name: 'East-Northeast', min: 67.5, max: 90, arrow: '↗'},
+  { name: 'East', min: 90, max: 112.5, arrow: '→'},
+  { name: 'East-Southeast', min: 112.5, max: 135, arrow: '↘'},
+  { name: 'Southeast', min: 135, max: 157.5, arrow: '↘'},
+  { name: 'South-Southeast', min: 157.5, max: 180, arrow: '↘'},
+  { name: 'South', min: 180, max: 202.5, arrow: '↓'},
+  { name: 'South-Southwest', min: 202.5, max: 225, arrow: '↙'},
+  { name: 'Southwest', min: 225, max: 247.5, arrow: '↙'},
+  { name: 'West-Southwest', min: 247.5, max: 270, arrow: '↙'},
+  { name: 'West', min: 270, max: 292.5, arrow: '←'},
+  { name: 'West-Northwest', min: 292.5, max: 315, arrow: '↖'},
+  { name: 'Northwest', min: 315, max: 337.5, arrow: '↖'},
+  { name: 'North-Northwest', min: 337.5, max: 360, arrow: '↖'}
+];
 
 function getDescriptionWeatherCode(weatherCode) {
   
@@ -50,7 +71,7 @@ function getImageWeatherCode(weatherCode){
     case 73:
       return '../img/snowy.png';
     default:
-      return 'Unknown code';
+      return '../img/no_image_icon.png';
   }
 }
 
@@ -103,6 +124,27 @@ function clearFetchedFata(){
 
 }
 
+function openTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(tabName).style.display = "inline";
+  evt.currentTarget.className += " active";
+}
+
 function getLocalDate(date){
     // Get the time zone offset in minutes
     //negative value because getTimezoneOffset returns the offset to UTC
@@ -136,6 +178,18 @@ function getFormattedForecastDate(amountDays) {
   return `${year}-${month}-${day}`;
 }
 
+function getDirectionWind(degrees){
+
+  for (const item of directions) {
+    if (degrees >= item.min && degrees < item.max) {
+        return `${item.arrow} ${item.name}`;
+    }
+  }
+
+  return 'Unknown';
+
+}
+
 function displayLocation(latitude, longitude){
 
   clearFetchedFata();
@@ -144,9 +198,8 @@ function displayLocation(latitude, longitude){
   let endDate = getFormattedForecastDate(forecastAmounDays);
 
   console.log(startDate, endDate);
-
-  const urlCurrentData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weathercode,relative_humidity_2m`;
-  const urlForecastData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&start_date=${startDate}&end_date=${endDate}`;
+  const urlCurrentData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&current=${current}`;
+  const urlForecastData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&daily=${daily}&start_date=${startDate}&end_date=${endDate}`;
 
   getAllData(urlCurrentData, urlForecastData);
 
@@ -190,14 +243,24 @@ function getAllData(urlCurrentData, urlForecast) {
 function getFetchDailyWeather(data){
 
   const nextDays = data.daily.time;
+
   const codes = data.daily.weathercode;
+
   const minTemps = data.daily.temperature_2m_min;
   const maxTemps = data.daily.temperature_2m_max;
   const unitTemps = data.daily_units.temperature_2m_min;
 
+  const maxWindSpeed = data.daily.wind_speed_10m_max;
+  const unitWindSpeed = data.daily_units.wind_speed_10m_max;
+  const windDirectionDominant = data.daily.wind_direction_10m_dominant;
 
-  let ulItem  = document.getElementById("forecast_nextdays").querySelector("ul");
+  const minHumidity = data.daily.relative_humidity_2m_min;
+  const maxHumidity = data.daily.relative_humidity_2m_max;
+  const unitMinHumidity = data.daily_units.relative_humidity_2m_min;
+  //const unitMzxHumidity = data.daily_units.relative_humidity_2m_max;
 
+  //-------------Temperature Tab-------------------------------------------
+  let ulItem  = document.getElementById("temperature").querySelector("ul");
   for (let i = 0; i < nextDays.length; i++) {
 
       let date =  getLocalDate(new Date(nextDays[i]));
@@ -206,13 +269,30 @@ function getFetchDailyWeather(data){
       const descImg = getDescriptionWeatherCode(codes[i]); 
 
       let titleItem = document.createElement("li");
-      titleItem.classList.add("centered_text");
       titleItem.innerHTML = `<img src="${imgUrl}" alt="${descImg}"/>`; 
-      titleItem.innerHTML += `${getDayWeekStr(date)}  ${shortFormatDate(date)} <br> ${minTemps[i]}/${maxTemps[i]} ${unitTemps}`; 
+      titleItem.innerHTML += `<br> ${getDayWeekStr(date)} ${shortFormatDate(date)} <br> t\u00B0: ${Math.floor(minTemps[i])}/${Math.floor(maxTemps[i])} ${unitTemps}`; 
       ulItem.append(titleItem);
   } 
+  //-------------Wind Tab-------------------------------------------
+  ulItem  = document.getElementById("wind").querySelector("ul");
+  for (let i = 0; i < nextDays.length; i++) {
 
+    let date =  getLocalDate(new Date(nextDays[i]));
 
+    let titleItem = document.createElement("li");
+    const windDirectionStr = getDirectionWind(windDirectionDominant[i]);
+    titleItem.innerHTML += `${getDayWeekStr(date)} ${shortFormatDate(date)} <br>${windDirectionStr} <br> ${maxWindSpeed[i]} ${unitWindSpeed}`; 
+    ulItem.append(titleItem);
+  } 
+  //-------------Precipitation Probability Tab-------------------------------------------
+  ulItem  = document.getElementById("humidity").querySelector("ul");
+  for (let i = 0; i < nextDays.length; i++) {
+
+    let date =  getLocalDate(new Date(nextDays[i]));
+    let titleItem = document.createElement("li");
+    titleItem.innerHTML += `${getDayWeekStr(date)} ${shortFormatDate(date)} <br>💧: ${minHumidity[i]}/${maxHumidity[i]}${unitMinHumidity}`; 
+    ulItem.append(titleItem);
+  } 
 }
 
 function getFetchCurrentWeather(data){
@@ -222,9 +302,12 @@ function getFetchCurrentWeather(data){
     const weatherCode = data.current.weathercode;
     const temperature = Math.floor(parseInt(data.current.temperature_2m));
     const windSpeed = data.current.wind_speed_10m;
+    const windDirection = data.current.wind_direction_10m;
+    const humidity = data.current.relative_humidity_2m;
     
     const temperatureUnit = data.current_units.temperature_2m;
     const windSpeedUnit = data.current_units.wind_speed_10m;
+    const humidityUnit = data.current_units.relative_humidity_2m;
 
     //-------------Current Date-------------------
     const local = getLocalDate(today);
@@ -232,34 +315,31 @@ function getFetchCurrentWeather(data){
     let item = document.createElement("div");
     item.classList.add("big_font");
     const dayOfWeek = getDayWeekStr(local);
-    item.innerHTML = `<p>${dayOfWeek}</p>`;
-    currWeatherDateContainer.append(item);
-    
-    item = document.createElement("div");
     const dateFormatted = formatDate(local);
-    item.innerHTML = `<p>${dateFormatted}</p>`;
+    item.innerHTML = `${dayOfWeek} <br> ${dateFormatted}`;
     currWeatherDateContainer.append(item);
     //-------------End Current Date----------------
     
     //-------------Temperature---------------------
     let currentTemperature = document.getElementById("current_temperature");
     let temperatureItem = document.createElement("p");
-    temperatureItem.classList.add("super_big_font");
-    temperatureItem.innerText = `${temperature} ${temperatureUnit}`;
+    temperatureItem.classList.add("big_font");
+    temperatureItem.classList.add("centered-text");
+    const windDirectionStr = getDirectionWind(windDirection);
+    temperatureItem.innerHTML= `t\u00B0: ${temperature} ${temperatureUnit} <br> ${windDirectionStr} ${windSpeed} ${windSpeedUnit} <br>💧: ${humidity}${humidityUnit}`;
     currentTemperature.append(temperatureItem);
     //-------------End Temperature---------------------
     
     //-------------Start Weather Code------------------
     let currentWeather = document.getElementById("current_weather_code");
     let imgItem = document.createElement("p");
+    imgItem.classList.add("centered-text");
+    imgItem.classList.add("big_font");
     const imgUrl = getImageWeatherCode(weatherCode); 
     const descImg = getDescriptionWeatherCode(weatherCode); 
     imgItem.innerHTML = `<img src="${imgUrl}" alt="${descImg}"/>`;
+    imgItem.innerHTML += `<br> <p>${descImg}</p>`;
     currentWeather.append(imgItem);
-
-    let descWeather = document.createElement("p");
-    descWeather.innerText = descImg;
-    currentWeather.append(descWeather);
     //-------------End Weather Code------------------
 
 }
@@ -278,8 +358,8 @@ function convertToFahrenheit(){
   let startDate = getFormattedForecastDate(1);
   let endDate = getFormattedForecastDate(forecastAmounDays);
 
-  const urlCurrentData =  `${apiUrl}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,weathercode&temperature_unit=fahrenheit`;
-  const urlForecastData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&start_date=${startDate}&end_date=${endDate}&temperature_unit=fahrenheit`;
+  const urlCurrentData =  `${apiUrl}?latitude=${latitude}&longitude=${longitude}&current=${current}&temperature_unit=fahrenheit`;
+  const urlForecastData = `${apiUrl}?latitude=${latitude}&longitude=${longitude}&daily=${daily}&start_date=${startDate}&end_date=${endDate}&temperature_unit=fahrenheit`;
 
   getAllData(urlCurrentData, urlForecastData);
 
@@ -303,3 +383,4 @@ if(navigator.geolocation){
 }else{
   console.error("Your browser does not support geolocation.");
 }
+
