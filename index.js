@@ -54,24 +54,24 @@ function getDescriptionWeatherCode(weatherCode) {
 function getImageWeatherCode(weatherCode) {
   switch (weatherCode) {
     case 0:
-      return "../img/sunny.png";
+      return "img/sunny.png";
     case 1:
-      return "../img/mostly_sunny.png";
+      return "img/mostly_sunny.png";
     case 2:
-      return "../img/partly_cloudy.png";
+      return "img/partly_cloudy.png";
     case 3:
-      return "../img/cloudly.png";
+      return "img/cloudly.png";
     case 80:
     case 81:
     case 82:
     case 83:
-      return "../img/rainy.png";
+      return "img/rainy.png";
     case 71:
     case 72:
     case 73:
-      return "../img/snowy.png";
+      return "img/snowy.png";
     default:
-      return "../img/no_image_icon.png";
+      return "img/no_image_icon.png";
   }
 }
 
