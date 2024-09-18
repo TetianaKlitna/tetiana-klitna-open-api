@@ -37,15 +37,35 @@ function getDescriptionWeatherCode(weatherCode) {
       return "Partly Cloudy";
     case 3:
       return "Cloudly"; //Overcast
+    case 45:
+    case 48:
+      return "Foggy";
+    case 51:
+    case 53:
+    case 55:
+      return "Drizzle";
+    case 56:
+    case 57:
+      return "Freezing Drizzle";
+    case 61:
+    case 63:
+    case 65:
+      return "Rainy";
+    case 66:
+    case 67:
+      return "Freezing Rain";
+    case 71:
+    case 73:
+    case 75:
+    case 77:
+      return "Snowy";
     case 80:
     case 81:
     case 82:
-    case 83:
-      return "Rainy";
-    case 71:
-    case 72:
-    case 73:
-      return "Snowy";
+      return "Rain Showers";
+    case 85:
+    case 86:
+      return "Snow Showers";
     default:
       return "Unknown code";
   }
@@ -61,15 +81,35 @@ function getImageWeatherCode(weatherCode) {
       return "img/partly_cloudy.png";
     case 3:
       return "img/cloudly.png";
+    case 45:
+    case 48:
+        return "img/foggy.png";
+    case 51:
+    case 53:
+    case 55:
+        return "img/drizzle.png";
+    case 56:
+    case 57:
+        return "img/freezing_drizzle.png";
+    case 61:
+    case 63:
+    case 65:
+      return "img/rainy.png";
+    case 66:
+    case 67:
+      return "img/freezing_rain.png"
+    case 71:
+    case 73:
+    case 75:
+    case 77:
+      return "img/snowy.png";
     case 80:
     case 81:
     case 82:
-    case 83:
-      return "img/rainy.png";
-    case 71:
-    case 72:
-    case 73:
-      return "img/snowy.png";
+       return "img/rain_showers.png";
+    case 85:
+    case 86:
+       return "img/snow_showers.png";
     default:
       return "img/no_image_icon.png";
   }
@@ -279,7 +319,7 @@ function getFetchDailyWeather(data) {
     const descImg = getDescriptionWeatherCode(codes[i]);
 
     let titleItem = document.createElement("li");
-    titleItem.innerHTML = `<img src="${imgUrl}" alt="${descImg}"/>`;
+    titleItem.innerHTML = `<img src="${imgUrl}" alt="${descImg}"/> <br> ${descImg} <br>`;
     titleItem.innerHTML += `<br> ${getDayWeekStr(date)} ${shortFormatDate(
       date
     )} <br> t\u00B0: ${Math.floor(minTemps[i])}/${Math.floor(
