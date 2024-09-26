@@ -231,13 +231,15 @@ function formatDateToYYYYMMDD(date) {
 }
 
 function getFormattedForecastDate(amountDays) {
-  var currentDate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 
-  var day = currentDate.getDate() + amountDays;
-  var month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-  var year = String(currentDate.getFullYear()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+    var currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() + amountDays + 1);
+  
+    var day = String(currentDate.getDate()).padStart(2, "0");
+    var month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    var year = currentDate.getFullYear(); 
+  
+    return `${year}-${month}-${day}`;
 }
 
 function getDirectionWind(degrees) {
